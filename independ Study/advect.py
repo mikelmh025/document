@@ -20,10 +20,12 @@ counter = xa
 
 
 for i in range(1,N+1):
-	if counter <0.5:
+	if counter <= 0.3:
 		u[i] = 2
-	else:
-		u[i] = -1
+	elif (counter > 0.3) & (counter <= 0.6):
+		u[i] = -1	
+	elif (counter > 0.6) & (counter <=1) :
+		u[i] = 3
 	counter = counter + dx
 
 
@@ -63,7 +65,7 @@ t=0;
 
 # Ncycle revolutions for tmax
 Ncycle = 1;
-tmax=0.1; #Ncycle*2.*pi/abs(c);
+tmax=0.3; #Ncycle*2.*pi/abs(c);
 
 #hold on;
 plt.plot(x,u[1:N+1],'r*-')
@@ -95,19 +97,40 @@ while t < tmax:
 		#uNew[i] =  u[i] - dt/dx*u[i]*(u[i] - u[i-1])
 		#uNew[i] = u[i] - dt/dx*(0.5*u[i]*u[i] - 0.5*u[i-1]*u[i-1])
 
+		
 		sr = 0.5 * (u[i+1] + u[i])
 		sl = 0.5 * (u[i] + u[i-1])
-		if sr>0:
-			FR = 0.5*u[i+1]*u[i+1]
-		else:
-			FR = 0.5*u[i]*u[i]
+		if u[i]>=u[i+1]:	
+			if sr>0:
+				FR = 0.5*u[i]*u[i]
+			else:
+				FR = 0.5*u[i+1]*u[i+1]
 
-		if sl>0:
-			FL = 0.5*u[i]*u[i]
-		else:
-			FL = 0.5*u[i-1]*u[i-1]
+			if sl>0:
+				FL = 0.5*u[i-1]*u[i-1]
+			else:
+				FL = 0.5*u[i]*u[i]
 
+		else:
+			if u[i] >= 0:
+				FR = 0.5 * u[i]*u[i]
+			elif u[i]<0 & 0< u[i+1]:
+				FR = 0
+			elif u[i+1] <=0:
+				FR = 0.5 * u[i+1]*u[i+1]
+
+			if u[i-1] >= 0:
+				FL = 0.5 * u[i-1]*u[i-1]
+			elif u[i-1]<0 & 0< u[i]:
+				FL = 0
+			elif u[i] <=0:
+				FL = 0.5 * u[i]*u[i]	
+		
 		uNew[i] = u[i] - dt/dx*(FR-FL)
+		
+
+				
+
 
       
    #update t

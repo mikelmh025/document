@@ -1,0 +1,7 @@
+CommandLineArguments.c : a code from instruction. This code takes input from line counts the number and print the number and the input.
+FileIO.c : takes input from a file and print the input in another file each word a line.
+standardInput.c : takes input on command line and return the intergers of the the inputs
+hello.c : print hello world on line
+README : a explaination of what we did in this lab
+Makefile : a makefile for FileReverse.c
+FileReverse.c : similar to FileIO. But this code will reverse the words and print it to the output file

@@ -13,7 +13,7 @@ def minmod (x, y):
 		return x
 	elif abs(y) < abs(x) and x*y > 0:
 		return y
-	elif x * y <= 0 :
+	else:
 		return 0
 	
 
@@ -97,20 +97,24 @@ for i in range(0,N+2):
 	ur.append(u[i])
 
 
-   
+# --------- CONTROL CENTER -------------   
+#method  0: centered slop.    1: upwind slop.     2:downwind slop
+#method  3: minmod            4: MC limiter       5:van Leer s limiter.
+#boundry 0: periodic boundry  1: outflow boundry 
+
+method  = 4
+boundry = 1
+# --------- CONTROL CENTER -------------
+
+# TODO: 2. Not sure why it would not stop				 |  Still have trouble
+# TODO: minmod. Def minmod doesn't work.                 |  Solved by hard coding minmod(), in method 3
+# TODO: 4. Not finished coding. Not sure about minmod .  |  Solved by hard coding minmod(), in method 4
+# TODO: The behaviour of the graph doesn t working ideal.
+
 uNew = [0 for i in range(N+2)]
 
 while t < tmax:
 	for i in range(1,N+1):
-		
-		#method 0: centered slop.  1: upwind slop.  2:downwind slop
-		#method 3: minmod          4: MC limiter    5:van Leer s limiter.
-
-		# TODO: 2. Not sure why it would not stop
-		# TODO: minmod. Def minmod doesn't work
-		# TODO: 4. Not finished coding. Not sure about minmod 
-		method = 3
-
 		if method == 0:
 			#Delta for the slop, now we are using centered slop
 			delta    = 0.5 * (u[i+1]         - u[i-1] ) /dx   #delta i
@@ -120,7 +124,7 @@ while t < tmax:
 			delta    = (u[i]   - u[i-1] ) /dx   #delta i
 			delta1   = (u[i+1] - u[i]   ) /dx   #delta i+1
 			delta01  = (u[i-1] - u[i-2] ) /dx   #delta i-1
-		elif method == 2:  #bug
+		elif method == 2:  
 			delta   = (u[i+1]         - u[i]  ) /dx   #delta i
 			delta1  = (u[(i+2)%(N+2)] - u[i+1]) /dx   #delta i+1
 			delta01 = (u[i]           - u[i-1]) /dx   #delta i-1
@@ -172,9 +176,53 @@ while t < tmax:
 			c1  = 2 * (u[i+1] - u[i]  ) / dx 
 			c01 = 2 * (u[i]   - u[i-1]) / dx 
 
-			delta   = minmod(minmod (a, b), c)
-			delta1  = minmod(minmod (a1, b1), c1)
-			delta01 = minmod(minmod (a01, b01), c01)
+			# minmod (a,b)
+			if   abs(a) < abs(b) and a*b > 0:
+				delta = a
+			elif abs(b) < abs(a) and a*b > 0:
+				delta = b
+			elif a * b <= 0 :
+				delta = 0
+
+			if   abs(a1) < abs(b1) and a1*b1 > 0:
+				delta1 = a1
+			elif abs(b1) < abs(a1) and a1*b1 > 0:
+				delta1 = b1
+			elif a1*b1 <= 0 :
+				delta1 = 0
+
+			if   abs(a01) < abs(b01) and a01*b01 > 0:
+				delta01 = a01
+			elif abs(b01) < abs(a01) and a01*b01 > 0:
+				delta01 = b01
+			elif a01*b01 <= 0 :
+				delta01 = 0
+
+			# minmod (delta, c)
+			if   abs(delta) < abs(c) and delta*c > 0:
+				delta = delta
+			elif abs(c) < abs(delta) and delta*c > 0:
+				delta = c
+			elif delta * c <= 0 :
+				delta = 0
+
+			if   abs(delta1) < abs(c1) and delta1*c1 > 0:
+				delta1 = delta1
+			elif abs(c1) < abs(delta1) and delta1*c1 > 0:
+				delta1 = c1
+			elif delta1*c1 <= 0 :
+				delta1 = 0
+
+			if   abs(delta01) < abs(c01) and delta01*c01 > 0:
+				delta01 = delta01
+			elif abs(c01) < abs(delta01) and delta01*c01 > 0:
+				delta01 = c01
+			elif delta01*c01 <= 0 :
+				delta01 = 0
+
+			#delta   = minmod(minmod (a, b), c)
+			#delta1  = minmod(minmod (a1, b1), c1)
+			#delta01 = minmod(minmod (a01, b01), c01)
 
 		elif method == 5:
 			a   = (u[i]   - u[i-1]) / dx 
@@ -259,8 +307,10 @@ while t < tmax:
    
    #update BC
 	uNew[0]   = uNew[N]
-	#uNew[N+1] = uNew[1]
-	uNew[N+1] = uNew[N]
+	if   boundry == 0:
+		uNew[N+1] = uNew[1]  # periodic boundry 
+	elif boundry == 1:
+		uNew[N+1] = uNew[N]  # outflow boundry
 
    #store updated solution
 	u = []

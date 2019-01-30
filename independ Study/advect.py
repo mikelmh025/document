@@ -102,7 +102,7 @@ while t < tmax:
 		#uNew[i] =  u[i] - dt/dx*u[i]*(u[i] - u[i-1])
 		#uNew[i] = u[i] - dt/dx*(0.5*u[i]*u[i] - 0.5*u[i-1]*u[i-1])
 		'''
-		'''
+		
 		sr = 0.5 * (u[i+1] + u[i])
 		sl = 0.5 * (u[i] + u[i-1])
 		if u[i]>=u[i+1]:	
@@ -132,7 +132,7 @@ while t < tmax:
 				FL = 0.5 * u[i]*u[i]	
 		
 		uNew[i] = u[i] - dt/dx*(FR-FL)
-		'''
+		
 		
 		#Delta for the slop, now we are using centered slop
 		delta = 0.5*(u[i+1] - u[i-1])/dx   #delta i
@@ -182,7 +182,7 @@ while t < tmax:
 		
 
 
-		uNew[i] = u[i] - dt/dx * (F_PLM_R - F_PLM_L)
+		#uNew[i] = u[i] - dt/dx * (F_PLM_R - F_PLM_L)
 
 				
 

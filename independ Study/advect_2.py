@@ -7,7 +7,7 @@ import matplotlib.pyplot as plt
 
   
 def minmod (x, y):
-	return y
+	#return y
 	
 	if   abs(x) < abs(b) and x*y > 0:
 		return x
@@ -31,31 +31,31 @@ x  = geek.linspace(xa + 0.5 * dx, xb - 0.5 * dx, N)
 u       = [0 for i in range(N+2)]
 counter = xa
 
-
+'''
 for i in range(1,N+1):
 	if counter <= 0.3:
-		u[i] = 2
-	elif (counter > 0.3) & (counter <= 0.6):
 		u[i] = -1
+	elif (counter > 0.3) & (counter <= 0.6):
+		u[i] = 2
 	elif (counter > 0.6) & (counter <=1) :
-		u[i] = 3
+		u[i] = -2
 	counter = counter + dx
 
 
 '''
 for i in range(1,N+1):
-	u[i] = 0.5*math.sin(2*math.pi*x[i-1])+100000 
+	u[i] = geek.sin(2*math.pi*x[i-1])
 
 print u
-'''
+
 
 # periodic BC
-#u[0]=u[N];
-#u[N+1]=u[1];
+u[0]=u[N];
+u[N+1]=u[1];
 
 #outflow BC
-u[0]   = u[1]
-u[N+1] = u[N]
+#u[0]   = u[1]
+#u[N+1] = u[N]
 
 # constant advection velocitypy
 c  = 1.
@@ -79,7 +79,7 @@ t  = 0
 
 # Ncycle revolutions for tmax
 Ncycle = 1
-tmax   = 0.3 #Ncycle*2.*pi/abs(c);
+tmax   = 0.7 #Ncycle*2.*pi/abs(c);
 
 #hold on;
 plt.plot(x,u[1:N+1],'r*-')
@@ -102,8 +102,8 @@ for i in range(0,N+2):
 #method  3: minmod            4: MC limiter       5:van Leer s limiter.
 #boundry 0: periodic boundry  1: outflow boundry 
 
-method  = 4
-boundry = 1
+method  = 3
+boundry = 0
 # --------- CONTROL CENTER -------------
 
 # TODO: 2. Not sure why it would not stop				 |  Still have trouble
@@ -115,6 +115,11 @@ uNew = [0 for i in range(N+2)]
 
 while t < tmax:
 	for i in range(1,N+1):
+		delta = 0
+		delta1 = 0
+		delta01 = 0
+
+		
 		if method == 0:
 			#Delta for the slop, now we are using centered slop
 			delta    = 0.5 * (u[i+1]         - u[i-1] ) /dx   #delta i
@@ -131,7 +136,7 @@ while t < tmax:
 		elif method == 3:
 			a   = (u[i]   - u[i-1]) / dx 
 			a1  = (u[i+1] - u[i]  ) / dx 
-			a01 = (u[i]   - u[i-1]) / dx 
+			a01 = (u[i-1]   - u[i-2]) / dx 
 
 			b    = (u[i+1]         - u[i]  	) / dx			
 			b1   = (u[(i+2)%(N+2)] - u[i+1] ) / dx
@@ -255,6 +260,10 @@ while t < tmax:
 		#ul[i] = u[i] - dx/2 * delta * (1 + Ca)
 		#ur[i] = u[i] + dx/2 * delta * (1 - Ca)
 
+		#delta   = 0.4
+		#delta1  = 0.2
+		#delta01 = 0.1
+
 		#F PLM:
 		F_PLM_L = 0  #F plm of i - 0.5
 		F_PLM_R = 0	 #F plm of i + 0.5	
@@ -263,35 +272,35 @@ while t < tmax:
 		if u[i] >= u[i+1]:
 			s_half = (u[i] + u[i+1])/2
 			if s_half >= 0:
-				F_PLM_R = 0.5 * (u[i]   + 0.5 * dx * delta  * (1-Ca)) * (u[i]   + 0.5 * dx * delta  * (1 - Ca))
+				F_PLM_R = 0.5 * (u[i]   + 0.5 * dx * delta  * (1-Ca))**2
 			elif s_half < 0:
-				F_PLM_R = 0.5 * (u[i+1] - 0.5 * dx * delta1 * (1+Ca)) * (u[i+1] - 0.5 * dx * delta1 * (1 + Ca))
+				F_PLM_R = 0.5 * (u[i+1] - 0.5 * dx * delta1 * (1+Ca))**2
 		#flux for rarefaction solution when u[i] < u [i+1].  
 		elif u[i] < u[i+1]:
 			if u[i] >= 0:
-				F_PLM_R = 0.5 * (u[i]   + 0.5 * dx * delta  * (1 - Ca)) * (u[i]   + 0.5 * dx * delta  * (1 - Ca))
+				F_PLM_R = 0.5 * (u[i]   + 0.5 * dx * delta  * (1 - Ca))**2
 			elif u[i] < 0 and u[i+1] >0:
 				F_PLM_R = 0
 			elif u[i+1] <= 0:
-				F_PLM_R = 0.5 * (u[i+1] - 0.5 * dx * delta1 * (1 + Ca)) * (u[i+1] - 0.5 * dx * delta1 * (1 + Ca))
+				F_PLM_R = 0.5 * (u[i+1] - 0.5 * dx * delta1 * (1 + Ca))**2
 		
 
 		#This is for F_PLM_L
 		#flux for shock solution when u[i-1] > =u [i].  
-		if u[i-1] >= u[i-1]:
+		if u[i-1] >= u[i]:
 			s_half = (u[i-1] + u[i])/2
 			if s_half  >= 0:
-				F_PLM_L = 0.5 * (u[i-1] + 0.5 * dx * delta01 * (1 - Ca)) * (u[i-1] + 0.5 * dx * delta01 * (1 - Ca))
+				F_PLM_L = 0.5 * (u[i-1] + 0.5 * dx * delta01 * (1 - Ca)) ** 2
 			elif s_half < 0:
-				F_PLM_L = 0.5 * (u[i]   - 0.5 * dx * delta   * (1 + Ca)) * (u[i]   - 0.5 * dx * delta   * (1 + Ca))
+				F_PLM_L = 0.5 * (u[i]   - 0.5 * dx * delta   * (1 + Ca)) ** 2
 		#flux for rarefaction solution when u[i-1] < u [i].  
 		elif u[i-1] < u[i]:
 			if u[i-1] >= 0:
-				F_PLM_L = 0.5 * (u[i-1] + 0.5 * dx * delta01 * (1 - Ca)) * (u[i-1] + 0.5 * dx * delta01 * (1 - Ca))
+				F_PLM_L = 0.5 * (u[i-1] + 0.5 * dx * delta01 * (1 - Ca)) ** 2
 			elif u[i-1] < 0 and u[i] >0:
 				F_PLM_L = 0
 			elif u[i] <= 0:
-				F_PLM_L = 0.5 * (u[i]   - 0.5 * dx * delta   * (1 + Ca)) * (u[i]   - 0.5 * dx * delta   * (1 + Ca))
+				F_PLM_L = 0.5 * (u[i]   - 0.5 * dx * delta   * (1 + Ca)) ** 2
 		
 
 		# Calculation of u : time at n+1 space at i
@@ -306,10 +315,12 @@ while t < tmax:
    
    
    #update BC
-	uNew[0]   = uNew[N]
+	
 	if   boundry == 0:
+		uNew[0]   = uNew[N]
 		uNew[N+1] = uNew[1]  # periodic boundry 
 	elif boundry == 1:
+		uNew[0]   = uNew[1]
 		uNew[N+1] = uNew[N]  # outflow boundry
 
    #store updated solution

@@ -55,7 +55,7 @@ Cc = 1.
 
 
 # CFL
-Ca = 0.7
+CFL = 0.5
 
 
 sList = []
@@ -63,7 +63,7 @@ for i in range(0,N+3):
 	sList.append(abs(0.5 * (u[i+1] + u[i])))
 
 
-dt = Ca * dx/max(sList)
+dt = CFL * dx/max(sList)
 t  = 0
 
 
@@ -143,8 +143,13 @@ while t < tmax:
 			else:
 				delta = (2 * a * b) / (a + b)
 
-		ul[i] = u[i] - dx/2 * delta * (1 + Ca)
-		ur[i] = u[i] + dx/2 * delta * (1 - Ca)
+		sl   = (u[i-1]+u[i]  )/2
+		sr   = (u[i]  +u[i+1])/2
+		Ca_l = sl * dt/dx
+		Ca_r = sr * dt/dx
+
+		ul[i] = u[i] - dx/2 * delta * (1 + Ca_l)
+		ur[i] = u[i] + dx/2 * delta * (1 - Ca_r)
 
 	#Loop for getting F_PLM
 	for i in range(2,N+3):
@@ -156,12 +161,12 @@ while t < tmax:
 			elif s_half < 0:
 				F_PLM[i] = 0.5 * ul[i] * ul[i]
 		else:
-			if u[i-1] >= 0:
+			if u[i-1] > 0:
 				F_PLM[i] = 0.5 * ur[i-1] * ur[i-1]
+			elif u[i] <0:
+				F_PLM[i] = 0.5 * ul[i] * ul[i]
 			elif u[i-1] < 0 and u[i] >0:
 				F_PLM[i] = 0
-			elif u[i] <= 0:
-				F_PLM[i] = 0.5 * ul[i] * ul[i]	
 			else: 
 				F_PLM[i] = 0
 
@@ -194,7 +199,7 @@ while t < tmax:
 	for i in range(0, N+3):
 		sList.append(abs(0.5 * (u[i+1] + u[i])))
 
-	dt=Ca * dx/abs(max(sList))
+	dt=CFL * dx/abs(max(sList))
 
    #plot
 	plt.clf   ()
